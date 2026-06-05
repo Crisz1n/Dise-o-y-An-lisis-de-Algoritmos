@@ -20,7 +20,7 @@ Construye un arreglo estrictamente creciente añadiendo un delta aleatorio unifo
 Se emplea un generador Mersenne Twister de 64 bits con semilla fija (42) para garantizar la reproducibilidad de los 
 experimentos experimentales
  */
-vector<uint64_t> generar_lineal(size_t n, uint64_t epsilon = 10) {
+vector<uint64_t> generar_lineal(size_t n, uint64_t epsilon =10) {
     vector<uint64_t> A(n);
     mt19937_64 rng(42);
     uniform_int_distribution<uint64_t> dist(1, epsilon);
@@ -29,6 +29,7 @@ vector<uint64_t> generar_lineal(size_t n, uint64_t epsilon = 10) {
     for (size_t i = 1; i < n; i++) {
         A[i] = A[i - 1] + dist(rng);
     }
+    
     return A;
 }
 /*
@@ -99,18 +100,18 @@ double medir_tiempo_busqueda_caso1(const Caso1& c1, int repeticiones) {
     size_t n = c1.datos.size();
 
     mt19937_64 rng(99);
-    uniform_int_distribution<size_t> dist(0, n - 1);
-    vector<uint64_t> consultas(repeticiones);
-    for (int i = 0; i < repeticiones; i++) consultas[i] = c1.datos[dist(rng)];
+    uniform_int_distribution<size_t> dist(0, n-1);
+    vector<uint64_t> consultas(repeticiones) ;
+    for (int i = 0; i < repeticiones; i++ ) consultas[i] =c1.datos[dist(rng)];
 
     auto inicio = chrono::high_resolution_clock::now();
     int64_t acc = 0;
     for (int i = 0; i < repeticiones; i++) {
-        uint64_t v = consultas[i] + (acc & 1);
-        int64_t r = c1.buscar(v);
-        acc += (r >= 0) ? r : 1;
+        uint64_t v= consultas[i] + (acc & 1);
+        int64_t r =c1.buscar(v) ;
+        acc += ( r>=0 ) ? r : 1;
     }
-    auto fin = chrono::high_resolution_clock::now();
+    auto fin = chrono::high_resolution_clock::now( );
     volatile int64_t sumidero = acc; (void)sumidero; //para que no borre el ciclo
 
     double total_ns = chrono::duration_cast<chrono::nanoseconds>(fin - inicio).count();
