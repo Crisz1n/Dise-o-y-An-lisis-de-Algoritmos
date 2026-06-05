@@ -39,7 +39,7 @@ struct Bitmap {
     size_t n_bits= 0;              // cuantos bits llevamos escritos
 
     void reservar_bits( size_t bits) {
-        palabras.reserve((bits + 63) / 64);
+        palabras.reserve( (bits + 63) / 64);
     }
 
     // Escribir un bit al final. Calculamos en que palabra cae (n_bits/64) y en que posicion dentro de esa palabra 
@@ -54,7 +54,7 @@ struct Bitmap {
 
     // Escribir varios bits (los 'ancho' bits de mas abajo de 'valor'), del menos significativo al mas significativo
     void writeBits(uint64_t valor,int ancho) {
-        for (int i = 0; i < ancho; i++ ) {
+        for (int i = 0; i <ancho; i++ ) {
             writeBit(static_cast<int>((valor >> i) & 1ULL) );
         }
     }
@@ -68,8 +68,8 @@ struct Bitmap {
 
     // Leer 'ancho' bits a partir de 'pos' y armar el numero de vuelta
     uint64_t readBits(size_t pos, int ancho) const {
-        uint64_t valor = 0;
-        for (int i = 0; i < ancho; i++) {
+        uint64_t valor= 0 ;
+        for (int i = 0; i< ancho; i++) {
             if (readBit(pos + i)) valor |= (1ULL << i);
         }
         return valor;
@@ -94,7 +94,7 @@ struct BloquePEF {
 };
 
 struct Caso3 {
-    Bitmap bajos;                   // todos
+    Bitmap bajos ;                   // todos
     Bitmap altos;                   //toda la parte alta en unario
     vector<BloquePEF> bloques ; // el directorio
     vector<uint64_t>  sample;  // el mismo sample del caso2
@@ -108,29 +108,29 @@ struct Caso3 {
      */
     void construir(const vector<uint32_t>& GC,
                    uint64_t primer_valor,
-                   const vector<uint64_t>& sample_c2,
+                   const vector<uint64_t>& sample_c2 ,
                    size_t salto_c2,
-                   size_t B = 128)
+                   size_t B= 128)
     {
-        n          = GC.size();
-        salto      = salto_c2;
-        sample     = sample_c2;
-        tam_bloque = B;
+        n = GC.size();
+        salto =salto_c2;
+        sample= sample_c2;
+        tam_bloque =B;
 
-        size_t num_bloques = (n + B - 1) / B;
-        bloques.resize(num_bloques);
+        size_t num_bloques= (n + B-1) /B ;
+        bloques.resize(num_bloques) ;
 
         //va llevando cuanto vale A hasta el inicio del bloque actual
         uint64_t acum_global = 0;
 
-        for (size_t b = 0; b < num_bloques; b++) {
+        for (size_t b = 0; b< num_bloques; b++) {
             size_t inicio = b * B;
-            size_t fin    = min(inicio + B, n);
-            size_t cant   = fin - inicio;
+            size_t fin= min(inicio + B,n);
+            size_t cant= fin -inicio;
 
             BloquePEF& blq= bloques[b];
-            blq.cant       =static_cast<uint32_t>(cant);
-            blq.off_bajos  =bajos.n_bits; // donde arranca este bloque en los bitmaps
+            blq.cant=static_cast<uint32_t>(cant);
+            blq.off_bajos=bajos.n_bits; // donde arranca este bloque en los bitmaps
             blq.off_altos = altos.n_bits;
 
             //acumular los gaps del bloque
@@ -138,33 +138,33 @@ struct Caso3 {
             vector<uint64_t> acum_local(cant);
             uint64_t s = 0;
             for (size_t j = 0; j < cant; j++) {
-                s += GC[inicio + j];
+                s += GC[inicio+ j];
                 acum_local[j] = s;
             }
 
             // La base del bloque: cuanto vale A justo antes de empezar el bloque
             // En el primer bloque es el primer_valor (A[0]); en los demas es lo acumulado de los bloques anteriores
-            if (b == 0) {
-                blq.base_global = primer_valor;
+            if (b ==0) {
+                blq.base_global =primer_valor;
             } else {
                 blq.base_global = acum_global;
             }
 
             //Elegir el k del bloque: la formula de la pauta es floor(log2(U/B)), con U="el maximo acumulado". Lo capamos 
             // a [0,58] por las dudas para que no se desborde nada al hacer los desplazamientos
-            uint64_t U = (cant > 0) ? acum_local[cant - 1] : 0;
+            uint64_t U= (cant > 0) ? acum_local[cant - 1] :0;
             int k = 0;
             if (U > 0 && cant > 0) {
                 double ratio = static_cast<double>(U) / static_cast<double>(cant);
                 k = (ratio >= 1.0) ? static_cast<int>(floor(log2(ratio))) : 0;
             }
          
-            if (k < 0)  k = 0;
-            if (k > 58) k = 58;
+            if (k < 0) k = 0;
+            if (k > 58) k= 58;
             blq.k = static_cast<uint8_t>(k);
 
             //Escribir la parte baja: los k bits de abajo de cada valor, seguidos
-            uint64_t mascara_bajos = (k > 0) ? ((1ULL << k) - 1) : 0ULL;
+            uint64_t mascara_bajos =(k > 0) ? ((1ULL << k) -1) : 0ULL;
             for (size_t j = 0; j < cant; j++) {
                 uint64_t low = acum_local[j] & mascara_bajos;
                 bajos.writeBits(low, k); // si k es 0 simplemente no escribe nada
@@ -172,17 +172,17 @@ struct Caso3 {
 
             //Escribir la parte alta en unario: por cada elemento ponemos tantos '0' como haya subido el cociente respecto 
             // al anterior, y cerramos con un '1' que marca "aca termina este elemento"
-            uint64_t h_prev = 0;
+            uint64_t h_prev =0;
             for (size_t j = 0; j < cant; j++) {
-                uint64_t h = (k > 0) ? (acum_local[j] >> k) : acum_local[j];
+                uint64_t h = (k > 0) ? (acum_local[j] >> k) :acum_local[j];
                 uint64_t ceros = h - h_prev;
                 for (uint64_t z = 0; z < ceros; z++) altos.writeBit(0);
                 altos.writeBit(1);
-                h_prev = h;
+                h_prev= h;
             }
 
             //Dejar listo el acumulado para el proximo bloque
-            acum_global = blq.base_global + ((cant > 0) ? acum_local[cant - 1] : 0);
+            acum_global= blq.base_global + ((cant > 0) ? acum_local[cant - 1] : 0);
         }
     }
 
@@ -191,15 +191,15 @@ struct Caso3 {
     posicion local, leemos los k bits bajos, y reconstruimos la parte alta recorriendo el unario (contando unos hasta 
     llegar a nuestro elemento, y los ceros del camino son el cociente). Despues juntamos las dos partes y le sumamos la base
      */
-    uint64_t decodificar(size_t i) const {
+    uint64_t decodificar(size_t i) const{
      
-        size_t b = i / tam_bloque;
+        size_t b= i /tam_bloque;
         size_t j = i % tam_bloque;
-        const BloquePEF& blq = bloques[b];
+        const BloquePEF& blq= bloques[b];
         int k = blq.k;
 
         // parte baja de la posicion j
-        uint64_t low = (k > 0) ? bajos.readBits(blq.off_bajos + j * k, k) : 0ULL; // CORREGIDO: Faltaba *
+        uint64_t low = (k > 0) ? bajos.readBits(blq.off_bajos + j * k, k) :0ULL;
 
         // parte alta: avanzamos por el unario contando unos (elementos) hasta el j que buscamos; cada cero que pasamos 
         //suma 1 al cociente
