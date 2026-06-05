@@ -104,8 +104,8 @@ double medir_tiempo_busqueda_caso1(const Caso1& c1, int repeticiones) {
     vector<uint64_t> consultas(repeticiones) ;
     for (int i = 0; i < repeticiones; i++ ) consultas[i] =c1.datos[dist(rng)];
 
-    auto inicio = chrono::high_resolution_clock::now();
-    int64_t acc = 0;
+    auto inicio =chrono::high_resolution_clock::now( );
+    int64_t acc= 0;
     for (int i = 0; i < repeticiones; i++) {
         uint64_t v= consultas[i] + (acc & 1);
         int64_t r =c1.buscar(v) ;
