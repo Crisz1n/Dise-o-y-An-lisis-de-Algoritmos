@@ -81,8 +81,8 @@ struct Bitmap {
 } ;
 
 /*
-Lo que se guarda por cada bloque. Con esto podemos saltar directo al bloque sin recorrer todo
-sabemos donde empieza su parte baja y su parte alta en los bitmaps, cuanto vale A justo antes del bloque (base_global) y que k uso
+Lo que se guarda por cada bloque. Con esto podemos saltar directo al bloque sin recorrer todo sabemos donde empieza su parte baja y su parte 
+alta en los bitmaps, cuanto vale A justo antes del bloque (base_global) y que k uso
  */
 struct BloquePEF {
     uint64_t base_global;
