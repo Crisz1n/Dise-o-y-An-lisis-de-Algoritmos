@@ -44,10 +44,10 @@ struct Bitmap {
     //Escribir un bit al final. Calculamos en que palabra cae (n_bits/64) y en que posicion dentro de esa palabra 
     //(n_bits%64) y prendemos el bit si toca
     void writeBit(int bit) {
-        size_t palabra = n_bits >> 6;           // /64
-        size_t offset  = n_bits & 63;           // %64
-        if (palabra>= palabras.size()) palabras.push_back(0ULL);
-        if (bit) palabras[palabra] |= (1ULL << offset);
+        size_t palabra= n_bits >> 6 ; // /64
+        size_t offset  =n_bits & 63; // %64
+        if (palabra>= palabras.size() ) palabras.push_back( 0ULL);
+        if (bit) palabras[palabra] |= ( 1ULL << offset);
         n_bits++;
     }
 
@@ -68,15 +68,15 @@ struct Bitmap {
     // Leer 'ancho' bits a partir de 'pos' y armar el numero de vuelta
     uint64_t readBits(size_t pos, int ancho) const {
         uint64_t valor= 0 ;
-        for (int i = 0; i< ancho; i++) {
+        for (int i= 0; i< ancho; i++) {
             if (readBit(pos + i)) valor |= (1ULL << i);
         }
         return valor;
     }
 
 
-    size_t espacio_bytes() const {
-        return palabras.size()* sizeof(uint64_t) ; 
+    size_t espacio_bytes() const{
+        return palabras.size()* sizeof( uint64_t) ; 
     }
 } ;
 
@@ -87,16 +87,16 @@ alta en los bitmaps, cuanto vale A justo antes del bloque (base_global) y que k 
 struct BloquePEF {
     uint64_t base_global;
     uint32_t cant;
-    uint8_t  k;
-    size_t   off_bajos;
-    size_t   off_altos;
+    uint8_t k;
+    size_t off_bajos;
+    size_t off_altos;
 };
 
 struct Caso3 {
-    Bitmap bajos ; // todos
+    Bitmap bajos ;// todos
     Bitmap altos; //toda la parte alta en unario
     vector<BloquePEF> bloques ; //el directorio
-    vector<uint64_t>  sample;  // el mismo sample del caso2
+    vector<uint64_t> sample;  // el mismo sample del caso2
     size_t salto ;
     size_t n;
     size_t tam_bloque; // B (lo dejamos en 128 )
@@ -105,11 +105,7 @@ struct Caso3 {
     Construccion: Recorremos el arreglo de gaps de a bloques de B. Por cada bloque: acumulamos los gaps para que quede creciente, 
     elegimos un k, y escribimos los bits bajos y los altos en los bitmaps. De paso vamos anotando en el directorio
      */
-    void construir(const vector<uint32_t>& GC,
-                   uint64_t primer_valor,
-                   const vector<uint64_t>& sample_c2 ,
-                   size_t salto_c2,
-                   size_t B= 128)
+    void construir(const vector<uint32_t>& GC, uint64_t primer_valor,const vector<uint64_t>& sample_c2 ,size_t salto_c2, size_t B= 128)
     {
         n = GC.size();
         salto =salto_c2;
