@@ -26,17 +26,16 @@ Al principio nos habiamos equivocado y guardabamos la parte alta como un uint64 
 MAS que el Caso
 1). Cuando lo pasamos a unario de verdad recien empezo a comprimir bien
 
-Todo se empaqueta bit a bit en un bitmap continuo de uint64_t con operaciones
-<<, >>, &, |, que es lo que pide la pauta para el Caso 3
- */
+Todo se empaqueta bit a bit en un bitmap continuo de uint64_t con operaciones <<, >>, &, |, que es lo que pide la pauta para el Caso 3
+*/
 
 /*
 Bitmap: nuestra "tira de bits" continua. Por dentro es un vector de uint64, y cada uint64 nos da 64 bits para usar
 Tiene metodos para escribir/leer un bit suelto o varios de una
  */
 struct Bitmap {
-    vector<uint64_t> palabras ;   //cada palabra = 64 bits
-    size_t n_bits= 0;              // cuantos bits llevamos escritos
+    vector<uint64_t> palabras ; //cada palabra = 64 bits
+    size_t n_bits= 0;// cuantos bits llevamos escritos
 
     void reservar_bits( size_t bits) {
         palabras.reserve( (bits + 63) / 64);
@@ -52,7 +51,7 @@ struct Bitmap {
         n_bits++;
     }
 
-    // Escribir varios bits (los 'ancho' bits de mas abajo de 'valor'), del menos significativo al mas significativo
+    // Escribir varios bits (los 'ancho' bits de mas abajo de 'valor') , del menos significativo al mas significativo
     void writeBits(uint64_t valor,int ancho) {
         for (int i = 0; i <ancho; i++ ) {
             writeBit(static_cast<int>((valor >> i) & 1ULL) );
@@ -95,8 +94,8 @@ struct BloquePEF {
 
 struct Caso3 {
     Bitmap bajos ; // todos
-    Bitmap altos;    //toda la parte alta en unario
-    vector<BloquePEF> bloques ; // el directorio
+    Bitmap altos; //toda la parte alta en unario
+    vector<BloquePEF> bloques ; //el directorio
     vector<uint64_t>  sample;  // el mismo sample del caso2
     size_t salto ;
     size_t n;
@@ -166,7 +165,7 @@ struct Caso3 {
             uint64_t mascara_bajos =(k > 0) ? ( (1ULL << k) -1) : 0ULL ;
             for (size_t j = 0; j < cant; j++ ) {
                 uint64_t low = acum_local[j] & mascara_bajos ;
-                bajos.writeBits( low, k); // si k es 0 simplemente no escribe nada
+                bajos.writeBits( low, k); //si k es 0 simplemente no escribe nada
             }
 
             //Escribir la parte alta en unario: por cada elemento ponemos tantos '0' como haya subido el cociente respecto 
@@ -268,27 +267,27 @@ struct Caso3 {
 };
 
 
-// Misma medicion de siempre (consultas pre-generadas y encadenadas para que el compilador no nos borre el ciclo)
+//Misma medicion de siempre (consultas pre-generadas y encadenadas para que el compilador no nos borre el ciclo)
 double medir_tiempo_busqueda_caso3( const Caso3& c3,
                                    const vector<uint64_t>& A_ref,
                                    int repeticiones) {
-    size_t n = A_ref.size();
+    size_t n =A_ref.size();
     mt19937_64 rng(99) ;
     uniform_int_distribution<size_t> dist(0, n-1) ;
     vector<uint64_t> consultas(repeticiones);
-    for (int i = 0; i < repeticiones; i++ ) consultas[i]= A_ref[dist(rng)];
+    for (int i = 0;i < repeticiones; i++ ) consultas[i]= A_ref[dist(rng)];
 
-    auto inicio = chrono::high_resolution_clock::now( );
+    auto inicio =chrono::high_resolution_clock::now( );
     int64_t acc = 0;
-    for (int i = 0; i < repeticiones; i++){
-        uint64_t v = consultas[i]+ (acc & 1);
+    for (int i = 0; i <repeticiones; i++){
+        uint64_t v= consultas[i]+ (acc & 1);
         int64_t r = c3.buscar(v) ;
-        acc += (r >= 0) ? r : 1 ;
+        acc += (r>= 0) ? r :1 ;
     }
  
     auto fin= chrono::high_resolution_clock::now( );
-    volatile int64_t sumidero= acc; (void)sumidero;
+    volatile int64_t sumidero= acc; (void)sumidero ;
 
-    double total_ns =chrono::duration_cast<chrono::nanoseconds>(fin - inicio).count();
+    double total_ns =chrono::duration_cast<chrono::nanoseconds>(fin - inicio).count( );
     return total_ns/repeticiones ;
 }
