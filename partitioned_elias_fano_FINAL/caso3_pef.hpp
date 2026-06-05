@@ -44,7 +44,7 @@ struct Bitmap {
     //Escribir un bit al final. Calculamos en que palabra cae (n_bits/64) y en que posicion dentro de esa palabra 
     //(n_bits%64) y prendemos el bit si toca
     void writeBit(int bit) {
-        size_t palabra= n_bits >> 6 ; // /64
+        size_t palabra= n_bits >> 6 ;//  /64
         size_t offset  =n_bits & 63; // %64
         if (palabra>= palabras.size() ) palabras.push_back( 0ULL);
         if (bit) palabras[palabra] |= ( 1ULL << offset);
@@ -129,11 +129,11 @@ struct Caso3 {
             blq.off_altos = altos.n_bits;
 
             //acumular los gaps del bloque (El A[0] real no esta en GC[0], se mete despues via base_global)
-            vector<uint64_t> acum_local(cant);
-            uint64_t s = 0;
-            for (size_t j = 0; j < cant; j++) {
+            vector<uint64_t> acum_local(cant) ;
+            uint64_t s= 0;
+            for (size_t j = 0; j< cant; j++) {
                 s += GC[inicio+ j];
-                acum_local[j] = s;
+                acum_local[j]= s;
             }
 
             // La base del bloque: cuanto vale A justo antes de empezar el bloque
@@ -150,17 +150,17 @@ struct Caso3 {
             int k = 0;
             if (U > 0 && cant > 0) {
                 double ratio = static_cast<double>(U) / static_cast<double>(cant);
-                k = (ratio >= 1.0) ? static_cast<int>(floor(log2(ratio))) : 0;
+                k = (ratio >= 1.0) ? static_cast<int>(floor(log2(ratio)) ) : 0;
             }
          
             if (k < 0) k = 0;
-            if (k > 58) k= 58;
-            blq.k = static_cast<uint8_t>(k);
+            if (k> 58) k= 58;
+            blq.k = static_cast<uint8_t>(k) ;
 
             //Escribir la parte baja: los k bits de abajo de cada valor, seguidos
             uint64_t mascara_bajos =(k > 0) ? ( (1ULL << k) -1) : 0ULL ;
-            for (size_t j = 0; j < cant; j++ ) {
-                uint64_t low = acum_local[j] & mascara_bajos ;
+            for (size_t j = 0; j < cant; j++ ){
+                uint64_t low= acum_local[j] & mascara_bajos ;
                 bajos.writeBits( low, k); //si k es 0 simplemente no escribe nada
             }
 
@@ -168,8 +168,8 @@ struct Caso3 {
             // al anterior, y cerramos con un '1' que marca "aca termina este elemento"
             uint64_t h_prev =0;
             for (size_t j = 0; j< cant; j++ ) {
-                uint64_t h = (k> 0) ? (acum_local[j] >> k) :acum_local[j] ;
-                uint64_t ceros = h - h_prev;
+                uint64_t h =(k> 0) ? (acum_local[j]>> k) :acum_local[j] ;
+                uint64_t ceros = h- h_prev;
                 for (uint64_t z = 0; z < ceros; z++) altos.writeBit(0);
                 altos.writeBit(1);
                 h_prev= h;
@@ -216,7 +216,7 @@ struct Caso3 {
     }
 
     /*
-    Busqueda. Igual que el caso2 en el paso 1 (binaria sobre el sample para achicar el rango), pero en el paso 2 
+    Busqueda; Igual que el caso2 en el paso 1 (binaria sobre el sample para achicar el rango), pero en el paso 2 
     en vez de sumar gaps vamos decodificando posicion por posicion sobre los bitmaps comprimidos
      */
     int64_t buscar(uint64_t valor) const {
@@ -226,9 +226,9 @@ struct Caso3 {
      
 
         while (izq <= der) {
-            int64_t mid = izq + (der - izq) / 2;
+            int64_t mid = izq + (der -izq) /2;
             if (sample[mid] == valor) {
-                return mid * static_cast<int64_t>(salto); 
+                return mid * static_cast<int64_t>( salto); 
             } else if (sample[mid] < valor) {
                 bloque_sample = mid;
                 izq = mid + 1;
@@ -240,12 +240,12 @@ struct Caso3 {
         if (valor < sample[0]) return -1;
 
         // recorrer el tramo decodificando hasta encontrarlo o pasarnos
-        size_t pos_inicio = static_cast<size_t>(bloque_sample) * salto; 
+        size_t pos_inicio = static_cast<size_t>(bloque_sample)* salto; 
         size_t pos_fin    = min(pos_inicio + salto, n) - 1;
 
         for (size_t i = pos_inicio; i <= pos_fin; i++) {
             uint64_t v = decodificar(i);
-            if (v == valor) return static_cast<int64_t>(i);
+            if (v ==valor) return static_cast<int64_t>(i);
             if (v >  valor) return -1;
         }
         return -1;
@@ -254,24 +254,23 @@ struct Caso3 {
     // Espacio: los dos bitmaps+ el directorio de bloques+ el sample
     size_t espacio_bytes() const {
         size_t total = 0;
-        total += bajos.espacio_bytes();
-        total += altos.espacio_bytes();
-        total += bloques.size() * sizeof(BloquePEF); 
-        total += sample.size() * sizeof(uint64_t);   
+        total+= bajos.espacio_bytes() ;
+        total +=altos.espacio_bytes();
+        total +=bloques.size() * sizeof(BloquePEF); 
+        total += sample.size()* sizeof(uint64_t );   
         return total;
     }
 };
 
 
 //Misma medicion de siempre (consultas pre-generadas y encadenadas para que el compilador no nos borre el ciclo)
-double medir_tiempo_busqueda_caso3( const Caso3& c3,
-                                   const vector<uint64_t>& A_ref,
-                                   int repeticiones) {
-    size_t n =A_ref.size();
+double medir_tiempo_busqueda_caso3( const Caso3& c3,const vector<uint64_t>& A_ref,int repeticiones) {
+ 
+    size_t n =A_ref.size( );
     mt19937_64 rng(99) ;
     uniform_int_distribution<size_t> dist(0, n-1) ;
     vector<uint64_t> consultas(repeticiones);
-    for (int i = 0;i < repeticiones; i++ ) consultas[i]= A_ref[dist(rng)];
+    for (int i = 0;i < repeticiones; i++ ) consultas[i]= A_ref[dist(rng)] ;
 
     auto inicio =chrono::high_resolution_clock::now( );
     int64_t acc = 0;
@@ -284,6 +283,6 @@ double medir_tiempo_busqueda_caso3( const Caso3& c3,
     auto fin= chrono::high_resolution_clock::now( );
     volatile int64_t sumidero= acc; (void)sumidero ;
 
-    double total_ns =chrono::duration_cast<chrono::nanoseconds>(fin - inicio).count( );
+    double total_ns =chrono::duration_cast<chrono::nanoseconds>(fin -inicio).count( );
     return total_ns/repeticiones ;
 }
