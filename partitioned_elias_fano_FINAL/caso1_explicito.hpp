@@ -112,7 +112,7 @@ double medir_tiempo_busqueda_caso1(const Caso1& c1, int repeticiones) {
         acc += ( r>=0 ) ? r : 1;
     }
     auto fin = chrono::high_resolution_clock::now( );
-    volatile int64_t sumidero = acc; (void)sumidero; //para que no borre el ciclo
+    volatile int64_t resultado_temporal = acc; (void)resultado_temporal; //para que no borre el ciclo
 
     double total_ns = chrono::duration_cast<chrono::nanoseconds>(fin - inicio).count();
     return total_ns / repeticiones;
