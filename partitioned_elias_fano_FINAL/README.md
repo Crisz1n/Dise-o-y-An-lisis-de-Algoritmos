@@ -1,7 +1,7 @@
-# Proyecto Semestral – INFO145: Diseño y Analisis de Algoritmos
+# INFO145: Diseño y Analisis de Algoritmos
 
 **Tecnicas de Representacion y Compresion en arreglos ordenados**  
-Primer semestre 2026
+
 
 ---
 
@@ -17,15 +17,12 @@ Partitioned Elias-Fano (PEF) | `caso3_pef.hpp` |
 ---
 
 ## Requisitos
-
-- `g++` con soporte para C++17
-- Sistema Linux/macOS (o WSL en Windows)
+- `g++` con soporte para C++
+- Sistema Linux/macOS
 - Herramienta `make`
-
 ---
 
 ## Compilacion
-
 ```bash
 make
 ```
@@ -45,15 +42,13 @@ make clean
 ### Modo Benchmark
 
 Ejecuta automaticamente todos los experimentos con arreglos de distintos tamaños
-(`100.000`, `1.000.000`, `10.000.000`) y distribuciones (lineal y normal con
-distintas desviaciones estandar). Los resultados se guardan en `resultados_benchmark.csv`
+(`100.000`, `1.000.000`, `10.000.000`) y distribuciones lineal y normal con
+distintas desviaciones estandar. Los resultados se guardan en `resultados_benchmark.csv`
 
 ```bash
 ./main --benchmark
 ---
-
 **Salida:** archivo `resultados_benchmark.csv` con columnas:
-
 ---
 n, distribucion, sigma,
 build_c1_ns, search_c1_ns, space_c1_bytes,
@@ -62,7 +57,7 @@ build_c3_ns, search_c3_ns, space_c3_bytes
 ---
 
 - `build_*_ns`: tiempo de construcción de la estructura en nanosegundos
-- `search_*_ns`: tiempo promedio de búsqueda (promedio de 500 búsquedas) en nanosegundos
+- `search_*_ns`: tiempo promedio de búsqueda en nanosegundos
 - `space_*_bytes`: espacio en memoria de la estructura en bytes
 ---
 
@@ -79,29 +74,10 @@ construye las tres estructuras y permite buscar valores de forma interactiva
 Enteros positivos, uno por linea o separados por coma. El programa los ordena automaticamente  
 Rango de valores aceptados: `0` a `18446744073709551615` (tipo `uint64_t`, equivalente a `unsigned long long`)
 
-**Ejemplo de archivo:**
-
-```
-2
-7
-10
-12
-16
-```
-
-**Interaccion:**
-
-```
-Valor: 10
-Estructura (1/2/3): 2
-  → Encontrado en posicioon 2 | Tiempo: 1240 ns
-```
-
----
 
 ## Descripción tecnica de los algoritmos
 
-### Caso 1 – Representación Explícita
+### Caso 1 – Representación Explicita
 
 Almacena el arreglo completo en memoria como `vector<uint64_t>`. La busqueda
 usa **busqueda binaria iterativa** con complejidad O(log n) en tiempo y O(n) en espacio
@@ -129,7 +105,7 @@ de los gaps se almacenan en un `vector<uint32_t>` (4 bytes por gap) en lugar de
 pequeños. **Esto reduce el arreglo de gaps a la mitad del Caso 1** y es una
 decision declarada explicitamente
 
-Para habilitar la busqueda se usa un **indice de muestreo (sample)**:
+Para habilitar la busqueda se usa un **indice de muestreo sample**:
 se guarda cada `b`-esimo valor original de `A` (con `b = sqrt(n)` por defecto)
 
 **Busqueda:**
@@ -145,7 +121,7 @@ Extiende Elias-Fano clasico para operar sobre gaps
 **Por bloque de tamaño B (= 128):**
 1. Se acumulan localmente los gaps → secuencia creciente local.
 2. Se calcula `k = floor(log2(U / B))` con `U = maximo acumulado del bloque`.
-3. Cada valor acumulado `v` se separa en:
+3. Cada valor acumulado `v` se separa enn:
    - **bits bajos** (`k` bits): los `k` bits menos significativos, escritos de
      forma contigua en un **bitmap continuo** (`vector<uint64_t>`).
    - **bits altos** (`v >> k`): se codifican en **unario** sobre un segundo
@@ -164,7 +140,7 @@ Extiende Elias-Fano clasico para operar sobre gaps
    acotado: se leen los `k` bits bajos, se reconstruye el bit alto contando el
    unario, se forma `v = (alto << k) | bajo` y se suma la `base_global`
 
-**Nota de implementacion (declarada):** La parte alta y la parte baja se 
+**Nota de implementacion:** La parte alta y la parte baja se 
 empaquetan **bit a bit** en bitmaps continuos de `uint64_t` usando operaciones
 bitwise (`<<`, `>>`, `&`, `|`), tal como sugiere la pauta para una
 implementacion estricta. No se usa el atajo de un entero por elemento, ya que
